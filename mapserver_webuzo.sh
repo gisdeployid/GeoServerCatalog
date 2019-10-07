@@ -1,7 +1,7 @@
 #!/bin/bash
-#script for ubuntu 18.04 (bionic)
+#script for ubuntu 16.04
 #maintance by aji19kamaludin@gmail.com
-#geoserver
+#mapserver
 
 # phppgadmin
 # http://ip/phppgadmin
@@ -23,29 +23,14 @@ export DEBIAN_FRONTEND=noninteractive
 apt update && apt dist-upgrade -y
 
 #set hostname
-hostnamectl set-hostname webuzo-geoserver-$domain
+hostnamectl set-hostname webuzo-mapserver-$domain
 
-#install docker
-apt --no-act install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-apt-key fingerprint 0EBFCD88
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+#install mapserver
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 089EBE08314DF160
+apt-key fingerprint 089EBE08314DF160
+add-apt-repository "deb http://ppa.launchpad.net/ubuntugis/ppa/ubuntu $(lsb_release -cs) main"
 apt update
-apt install docker-ce docker-ce-cli containerd.io -y
-
-#build geoserver from docker
-docker volume create gdp-geoserver_datadir
-docker run --name="geoserver" -p 8080 -v gdp-geoserver_datadir:/mnt/geoserver_datadir -d ajikamaludin/geoserver:v1
-
-#make it automation in reboot : exit rc.local
-touch /etc/rc.local
-chmod +x /etc/rc.local
-sed -i -e '$i \docker container start geoserver-gdp &\n' /etc/rc.local
-sed -i -e '$i \docker container start portainer &\n' /etc/rc.local
-
-#install portainer for console 
-docker volume create portainer_data
-docker run --name "portainer" -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+apt install cgi-mapserver mapserver-bin mapserver-doc python-mapscript -y
 
 #install webuzo and kill apache1, mysql is here
 cd /tmp
@@ -59,24 +44,38 @@ curl -d "uname=$uname&email=$email&pass=$password&rpass=$password&domain=$domain
 kill -9 $(ps aux | grep apache | awk '{print $2}')
 
 mv /usr/local/apps/apache/etc/httpd.conf /usr/local/apps/apache/etc/httpd.conf.bak
-#install lamp
+
+#install apache2, php5, enable mod_rewrite, changes php.ini
 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E5267A6C
 add-apt-repository "deb http://ppa.launchpad.net/ondrej/php/ubuntu $(lsb_release -cs) main "
-apt-get update
-apt install apache2 php7.3 php7.3-cli php7.3-common php7.3-curl php7.3-dev php7.3-gd php7.3-imap php7.3-intl php7.3-json php7.3-mbstring php7.3-mysql php7.3-pgsql php7.3-phpdbg php7.3-sqlite3 php7.3-sybase php7.3-xml php7.3-xmlrpc php7.3-xsl php7.3-zip libapache2-mod-php7.3 zip unzip -y
-a2enmod rewrite userdir
+apt update
+apt install apache2 php7.3 php7.3-cli php7.3-common php7.3-curl php7.3-dev php7.3-gd php7.3-imap php7.3-intl php7.3-json php7.3-mbstring php7.3-mysql php7.3-pgsql php7.3-phpdbg php7.3-sqlite3 php7.3-sybase php7.3-xml php7.3-xmlrpc php7.3-xsl php7.3-zip php7.3-fpm libapache2-mod-php7.3 zip unzip -y
+a2enmod actions cgi proxy_fcgi setenvif alias rewrite userdir
 sed -i '/php_admin_flag engine Off/c\php_admin_flag engine On' /etc/apache2/mods-enabled/php7.3.conf
 sed -i '/export APACHE_RUN_USER=www-data/c\export APACHE_RUN_USER='$uname /etc/apache2/envvars
 sed -i '/export APACHE_RUN_GROUP=www-data/c\export APACHE_RUN_GROUP='$uname /etc/apache2/envvars
 sed -i '/DocumentRoot/c\DocumentRoot /home/'$uname'/public_html\n' /etc/apache2/sites-available/000-default.conf
 sed -i -e '16i \<Directory /home/'$uname'/public_html> \nOptions Indexes FollowSymlinks MultiViews \nAllowOverride All \nRequire all granted\n </Directory>\n' /etc/apache2/sites-available/000-default.conf
-su -c "echo '<?php phpinfo(); ?>' > /home/$uname/public_html/index.php" $uname
+sed -i -e '16i \<Directory />\nOptions FollowSymLinks \nAllowOverride All \n</Directory> \nScriptAlias /cgi-bin/ /usr/lib/cgi-bin/ \n<Directory /usr/lib/cgi-bin> \nAllowOverride None \nOptions +ExecCGI -MultiViews +SymLinksIfOwnerMatch \nOrder allow,deny \nAllow from all \n</Directory>' /etc/apache2/sites-available/000-default.conf
 
+cp /usr/lib/php/7.3/php.ini-development /etc/php/7.3/apache2/php.ini
 #path php.ini from webuzo to /etc/php/7.3
 mv /usr/local/apps/php73/etc/php.ini /usr/local/apps/php73/etc/php.ini.back
 ln -s /etc/php/7.3/apache2/php.ini /usr/local/apps/php73/etc/php.ini
 
 systemctl restart apache2
+
+echo "<?php phpinfo(); ?>" > /home/$uname/public_html/index.php
+chmod o+x /usr/lib/cgi-bin/mapserv
+service apache2 restart
+
+#mapserver demo
+cd /tmp;wget http://maps.dnr.state.mn.us/mapserver_demos/workshop-5.4.zip;
+unzip workshop-5.4.zip -d /home/$uname/public_html
+mv /home/$uname/public_html/workshop-5.4 /home/$uname/public_html/demo
+chown -R $uname:$uname /home/$uname/public_html/demo
+cd /home/$uname/public_html/demo;rm index.html;
+wget https://gist.githubusercontent.com/ajikamaludin/8e9d801f91073a9a2f7fcffaec0dbcec/raw/7ca6f9a9d46a35443ddbf89c99a8c73d1b503dc5/index.php
 
 #install postgresql, postgis, phppgadmin
 echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list

@@ -22,6 +22,9 @@ domain='example.com'
 export DEBIAN_FRONTEND=noninteractive
 apt update && apt dist-upgrade -y
 
+#set hostname
+hostnamectl set-hostname webuzo-opengeo-$domain
+
 #install docker
 apt --no-act install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -96,7 +99,9 @@ systemctl restart postgresql
 
 cd /tmp;wget https://github.com/phppgadmin/phppgadmin/archive/REL_5-6-0.zip;
 wget https://gist.githubusercontent.com/ajikamaludin/2d1ae989402decad064f4d7d7ce424be/raw/60277bb5064b12e6c42993c4ecf08fd22ff5f969/phppgadmin-config.inc.php;
-unzip REL_5-6-0.zip -d /home/$uname/public_html
-mv /home/$uname/public_html/phppgadmin-REL_5-6-0 /home/$uname/public_html/phppgadmin
-cp /tmp/phppgadmin-config.inc.php /home/$uname/public_html/phppgadmin/conf/config.inc.php
+unzip REL_5-6-0.zip -d /usr/share
+mv /usr/share/phppgadmin-REL_5-6-0 /usr/share/phppgadmin
+cp /tmp/phppgadmin-config.inc.php /usr/share/phppgadmin/conf/config.inc.php
+echo "Alias /phppgadmin /usr/share/phppgadmin" >> /etc/apache2/sites-enabled/000-default.conf
+systemctl restart apache2
 echo "Done" > /root/README.md
