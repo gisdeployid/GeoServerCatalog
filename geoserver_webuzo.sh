@@ -1,7 +1,7 @@
 #!/bin/bash
 #script for ubuntu 18.04 (bionic)
 #maintance by aji19kamaludin@gmail.com
-#webuzo with opengeo by boundless
+#geoserver
 
 # phppgadmin
 # http://ip/phppgadmin
@@ -30,18 +30,14 @@ add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(
 apt update
 apt install docker-ce docker-ce-cli containerd.io -y
 
-#build opengeo from docker
+#build geoserver from docker
 docker volume create gdp-geoserver_datadir
-docker run --name "opengeo-gdp" -dit -v gdp-geoserver_datadir:/var/lib/opengeo/geoserver -p 8080:8080 ajikamaludin/ubuntu-opengeo
-docker exec opengeo-gdp service postgresql start
-docker exec opengeo-gdp service tomcat7 start
+docker run --name="geoserver" -p 8080 -v gdp-geoserver_datadir:/mnt/geoserver_datadir -d ajikamaludin/geoserver:v1
 
 #make it automation in reboot : exit rc.local
 touch /etc/rc.local
 chmod +x /etc/rc.local
-sed -i -e '$i \docker container start opengeo-gdp &\n' /etc/rc.local
-sed -i -e '$i \docker exec opengeo-gdp service postgresql start &\n' /etc/rc.local
-sed -i -e '$i \docker exec opengeo-gdp service tomcat7 start &\n' /etc/rc.local
+sed -i -e '$i \docker container start geoserver-gdp &\n' /etc/rc.local
 sed -i -e '$i \docker container start portainer &\n' /etc/rc.local
 
 #install portainer for console 
@@ -60,7 +56,6 @@ curl -d "uname=$uname&email=$email&pass=$password&rpass=$password&domain=$domain
 kill -9 $(ps aux | grep apache | awk '{print $2}')
 
 mv /usr/local/apps/apache/etc/httpd.conf /usr/local/apps/apache/etc/httpd.conf.bak
-
 #install lamp
 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E5267A6C
 add-apt-repository "deb http://ppa.launchpad.net/ondrej/php/ubuntu $(lsb_release -cs) main "
