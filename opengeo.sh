@@ -19,7 +19,7 @@ apt-get install docker-ce docker-ce-cli containerd.io -y
 
 #build opengeo from docker
 docker volume create gdp-geoserver_datadir
-docker run --name "opengeo-gdp" -dit -v gdp-geoserver_datadir:/var/lib/opengeo/geoserver -p 8080:8080 rikyperdana/ubuntu-opengeo
+docker run --name "opengeo-gdp" -dit -v gdp-geoserver_datadir:/var/lib/opengeo/geoserver -p 8080:8080 ajikamaludin/ubuntu-opengeo
 docker exec opengeo-gdp service postgresql start
 docker exec opengeo-gdp service tomcat7 start
 
