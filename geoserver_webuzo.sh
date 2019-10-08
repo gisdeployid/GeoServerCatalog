@@ -44,8 +44,8 @@ wget https://gist.githubusercontent.com/ajikamaludin/c8bb742cb60c7bfe8cc2a318be2
 systemctl enable rc-local
 chmod +x /etc/rc.local
 sed -i -e '$i \docker container start geoserver &\n' /etc/rc.local
-sed -i -e '$i \docker container start portainer &\n' /etc/rc.local
-sed -i -e '$i \systemctl start webuzo &\n' /etc/rc.local
+#sed -i -e '$i \docker container start portainer &\n' /etc/rc.local
+#sed -i -e '$i \systemctl start webuzo &\n' /etc/rc.local
 
 #install portainer for console 
 docker volume create portainer_data
