@@ -40,7 +40,7 @@ docker exec opengeo-gdp service postgresql start
 docker exec opengeo-gdp service tomcat7 start
 
 #make it automation in reboot : exit rc.local
-touch /etc/rc.local
+echo "exit 0" > /etc/rc.local
 chmod +x /etc/rc.local
 sed -i -e '$i \docker container start opengeo-gdp &\n' /etc/rc.local
 sed -i -e '$i \docker exec opengeo-gdp service postgresql start &\n' /etc/rc.local
