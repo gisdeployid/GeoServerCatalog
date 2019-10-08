@@ -49,7 +49,7 @@ sed -i -e '$i \docker container start portainer &\n' /etc/rc.local
 
 #install portainer for console 
 docker volume create portainer_data
-docker run --name "portainer" -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+docker run --name "portainer" -dit --restart unless-stopped -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
 
 #install webuzo and kill apache1, mysql is here
 cd /tmp
@@ -104,4 +104,6 @@ mv /usr/share/phppgadmin-REL_5-6-0 /usr/share/phppgadmin
 cp /tmp/phppgadmin-config.inc.php /usr/share/phppgadmin/conf/config.inc.php
 echo "Alias /phppgadmin /usr/share/phppgadmin" >> /etc/apache2/sites-enabled/000-default.conf
 systemctl restart apache2
+systemctl enable webuzo
 echo "Done" > /root/README.md
+reboot

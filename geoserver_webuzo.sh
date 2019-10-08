@@ -35,12 +35,12 @@ apt install docker-ce docker-ce-cli containerd.io -y
 
 #build geoserver from docker
 docker volume create gdp-geoserver_datadir
-docker run --name="geoserver" -p 8080:8080 -v gdp-geoserver_datadir:/mnt/geoserver_datadir -d ajikamaludin/geoserver:v1
+docker run --name="geoserver" -dit --restart unless-stopped -p 8080:8080 -v gdp-geoserver_datadir:/mnt/geoserver_datadir -d ajikamaludin/geoserver:v1
 
 #make it automation in reboot : exit rc.local
 touch /etc/rc.local
 chmod +x /etc/rc.local
-sed -i -e '$i \docker container start geoserver-gdp &\n' /etc/rc.local
+sed -i -e '$i \docker container start geoserver &\n' /etc/rc.local
 sed -i -e '$i \docker container start portainer &\n' /etc/rc.local
 
 #install portainer for console 
@@ -100,3 +100,5 @@ cp /tmp/phppgadmin-config.inc.php /usr/share/phppgadmin/conf/config.inc.php
 echo "Alias /phppgadmin /usr/share/phppgadmin" >> /etc/apache2/sites-enabled/000-default.conf
 systemctl restart apache2
 echo "Done" > /root/README.md
+systemctl enable webuzo
+reboot
