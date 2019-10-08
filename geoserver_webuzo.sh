@@ -35,7 +35,7 @@ apt install docker-ce docker-ce-cli containerd.io -y
 
 #build geoserver from docker
 docker volume create gdp-geoserver_datadir
-docker run --name="geoserver" -p 8080 -v gdp-geoserver_datadir:/mnt/geoserver_datadir -d ajikamaludin/geoserver:v1
+docker run --name="geoserver" -p 8080:8080 -v gdp-geoserver_datadir:/mnt/geoserver_datadir -d ajikamaludin/geoserver:v1
 
 #make it automation in reboot : exit rc.local
 touch /etc/rc.local
