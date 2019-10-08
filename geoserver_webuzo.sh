@@ -42,6 +42,7 @@ touch /etc/rc.local
 chmod +x /etc/rc.local
 sed -i -e '$i \docker container start geoserver &\n' /etc/rc.local
 sed -i -e '$i \docker container start portainer &\n' /etc/rc.local
+sed -i -e '$i \systemctl start webuzo &\n' /etc/rc.local
 
 #install portainer for console 
 docker volume create portainer_data
@@ -100,5 +101,4 @@ cp /tmp/phppgadmin-config.inc.php /usr/share/phppgadmin/conf/config.inc.php
 echo "Alias /phppgadmin /usr/share/phppgadmin" >> /etc/apache2/sites-enabled/000-default.conf
 systemctl restart apache2
 echo "Done" > /root/README.md
-systemctl enable webuzo
 reboot

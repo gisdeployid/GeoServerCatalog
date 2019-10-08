@@ -35,7 +35,7 @@ apt install docker-ce docker-ce-cli containerd.io -y
 
 #build opengeo from docker
 docker volume create gdp-geoserver_datadir
-docker run --name "opengeo-gdp" -dit -v gdp-geoserver_datadir:/var/lib/opengeo/geoserver -p 8080:8080 ajikamaludin/ubuntu-opengeo
+docker run --name "opengeo-gdp" -dit --restart unless-stopped -v gdp-geoserver_datadir:/var/lib/opengeo/geoserver -p 8080:8080 ajikamaludin/ubuntu-opengeo
 docker exec opengeo-gdp service postgresql start
 docker exec opengeo-gdp service tomcat7 start
 
@@ -46,6 +46,7 @@ sed -i -e '$i \docker container start opengeo-gdp &\n' /etc/rc.local
 sed -i -e '$i \docker exec opengeo-gdp service postgresql start &\n' /etc/rc.local
 sed -i -e '$i \docker exec opengeo-gdp service tomcat7 start &\n' /etc/rc.local
 sed -i -e '$i \docker container start portainer &\n' /etc/rc.local
+sed -i -e '$i \systemctl start webuzo &\n' /etc/rc.local
 
 #install portainer for console 
 docker volume create portainer_data
@@ -104,6 +105,5 @@ mv /usr/share/phppgadmin-REL_5-6-0 /usr/share/phppgadmin
 cp /tmp/phppgadmin-config.inc.php /usr/share/phppgadmin/conf/config.inc.php
 echo "Alias /phppgadmin /usr/share/phppgadmin" >> /etc/apache2/sites-enabled/000-default.conf
 systemctl restart apache2
-systemctl enable webuzo
 echo "Done" > /root/README.md
 reboot
