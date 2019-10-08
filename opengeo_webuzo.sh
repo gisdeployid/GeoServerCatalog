@@ -35,12 +35,15 @@ apt install docker-ce docker-ce-cli containerd.io -y
 
 #build opengeo from docker
 docker volume create gdp-geoserver_datadir
-docker run --name "opengeo-gdp" -dit --restart unless-stopped -v gdp-geoserver_datadir:/var/lib/opengeo/geoserver -p 8080:8080 ajikamaludin/ubuntu-opengeo
+docker run --name "opengeo-gdp" -dit --restart unless-stopped -v gdp-geoserver_datadir:/var/lib/opengeo/geoserver -p 8080:8080 rikyperdana/ubuntu-opengeo
 docker exec opengeo-gdp service postgresql start
 docker exec opengeo-gdp service tomcat7 start
 
 #make it automation in reboot : exit rc.local
-echo "exit 0" > /etc/rc.local
+printf '%s\n' '#!/bin/bash' 'exit 0' | sudo tee -a /etc/rc.local
+cd /etc/systemd/system/
+wget https://gist.githubusercontent.com/ajikamaludin/c8bb742cb60c7bfe8cc2a318be2fbe70/raw/32df77b43c5acf2dd5aae4f904d8ce5c0697c770/rc-local.service
+systemctl enable rc-local
 chmod +x /etc/rc.local
 sed -i -e '$i \docker container start opengeo-gdp &\n' /etc/rc.local
 sed -i -e '$i \docker exec opengeo-gdp service postgresql start &\n' /etc/rc.local

@@ -38,7 +38,10 @@ docker volume create gdp-geoserver_datadir
 docker run --name="geoserver" -dit --restart unless-stopped -p 8080:8080 -v gdp-geoserver_datadir:/mnt/geoserver_datadir -d ajikamaludin/geoserver:v1
 
 #make it automation in reboot : exit rc.local
-echo "exit 0" > /etc/rc.local
+printf '%s\n' '#!/bin/bash' 'exit 0' | sudo tee -a /etc/rc.local
+cd /etc/systemd/system/
+wget https://gist.githubusercontent.com/ajikamaludin/c8bb742cb60c7bfe8cc2a318be2fbe70/raw/32df77b43c5acf2dd5aae4f904d8ce5c0697c770/rc-local.service
+systemctl enable rc-local
 chmod +x /etc/rc.local
 sed -i -e '$i \docker container start geoserver &\n' /etc/rc.local
 sed -i -e '$i \docker container start portainer &\n' /etc/rc.local
