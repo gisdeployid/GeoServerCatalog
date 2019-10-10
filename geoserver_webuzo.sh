@@ -44,8 +44,9 @@ wget https://gist.githubusercontent.com/ajikamaludin/c8bb742cb60c7bfe8cc2a318be2
 systemctl enable rc-local
 chmod +x /etc/rc.local
 sed -i -e '$i \docker container start geoserver &\n' /etc/rc.local
-#sed -i -e '$i \docker container start portainer &\n' /etc/rc.local
-#sed -i -e '$i \systemctl start webuzo &\n' /etc/rc.local
+sed -i -e '$i \curl -X GET localhost:8080/web/ &\n' /etc/rc.local
+sed -i -e '$i \sleep 180 &\n' /etc/rc.local
+sed -i -e '$i \systemctl start webuzo &\n' /etc/rc.local
 
 #install portainer for console 
 docker volume create portainer_data
@@ -63,22 +64,30 @@ curl -d "uname=$uname&email=$email&pass=$password&rpass=$password&domain=$domain
 kill -9 $(ps aux | grep apache | awk '{print $2}')
 
 mv /usr/local/apps/apache/etc/httpd.conf /usr/local/apps/apache/etc/httpd.conf.bak
+
 #install lamp
 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E5267A6C
 add-apt-repository "deb http://ppa.launchpad.net/ondrej/php/ubuntu $(lsb_release -cs) main "
 apt-get update
-apt install apache2 php7.3 php7.3-cli php7.3-common php7.3-curl php7.3-dev php7.3-gd php7.3-imap php7.3-intl php7.3-json php7.3-mbstring php7.3-mysql php7.3-pgsql php7.3-phpdbg php7.3-sqlite3 php7.3-sybase php7.3-xml php7.3-xmlrpc php7.3-xsl php7.3-zip libapache2-mod-php7.3 zip unzip -y
-a2enmod rewrite userdir
-sed -i '/php_admin_flag engine Off/c\php_admin_flag engine On' /etc/apache2/mods-enabled/php7.3.conf
-sed -i '/export APACHE_RUN_USER=www-data/c\export APACHE_RUN_USER='$uname /etc/apache2/envvars
-sed -i '/export APACHE_RUN_GROUP=www-data/c\export APACHE_RUN_GROUP='$uname /etc/apache2/envvars
+apt install apache2 php7.3 php7.3-cli php7.3-common php7.3-curl php7.3-dev php7.3-gd php7.3-imap php7.3-intl php7.3-json php7.3-mbstring php7.3-mysql php7.3-pgsql php7.3-phpdbg php7.3-sqlite3 php7.3-sybase php7.3-xml php7.3-xmlrpc php7.3-xsl php7.3-zip libapache2-mod-php7.3 php7.3-fpm zip unzip -y
+a2enmod rewrite userdir suexec ssl actions include cgi dav_fs dav auth_digest headers proxy_fcgi alias
+echo "config" > /etc/apache2/conf-available/httpoxy.conf
+sed -i -e '/config/c \<IfModule mod_headers.c> \nRequestHeader unset Proxy early\n </IfModule>' /etc/apache2/conf-available/httpoxy.conf
+a2enconf httpoxy
 sed -i '/DocumentRoot/c\DocumentRoot /home/'$uname'/public_html\n' /etc/apache2/sites-available/000-default.conf
 sed -i -e '16i \<Directory /home/'$uname'/public_html> \nOptions Indexes FollowSymlinks MultiViews \nAllowOverride All \nRequire all granted\n </Directory>\n' /etc/apache2/sites-available/000-default.conf
+sed -i -e '21i \<IfModule proxy_fcgi_module> \n<IfModule setenvif_module> \nSetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1 \n</IfModule> \n<FilesMatch ".+\.ph(ar|p|tml)$"> \nSetHandler "proxy:unix:/run/php/php7.3-fpm.sock|fcgi://localhost" \n</FilesMatch> \n<FilesMatch ".+\.phps$"> \nRequire all denied \n</FilesMatch> \n<FilesMatch "^\.ph(ar|p|ps|tml)$"> \nRequire all denied \n</FilesMatch> \n</IfModule>' /etc/apache2/sites-available/000-default.conf
 su -c "echo '<?php phpinfo(); ?>' > /home/$uname/public_html/index.php" $uname
 
 #path php.ini from webuzo to /etc/php/7.3
+sed -i '/user = www-data/c\user = '$uname /etc/php/7.3/fpm/pool.d/www.conf
+sed -i '/group = www-data/c\group = '$uname /etc/php/7.3/fpm/pool.d/www.conf
+sed -i '420i \php_admin_value[open_basedir] = /home/'$uname /etc/php/7.3/fpm/pool.d/www.conf
+sed -i '420i \php_admin_value[disable_functions] = ' /etc/php/7.3/fpm/pool.d/www.conf
+
+#path php.ini from webuzo to /etc/php/7.3
 mv /usr/local/apps/php73/etc/php.ini /usr/local/apps/php73/etc/php.ini.back
-ln -s /etc/php/7.3/apache2/php.ini /usr/local/apps/php73/etc/php.ini
+ln -s /etc/php/7.3/fpm/php.ini /usr/local/apps/php73/etc/php.ini
 
 systemctl restart apache2
 
@@ -103,5 +112,14 @@ mv /usr/share/phppgadmin-REL_5-6-0 /usr/share/phppgadmin
 cp /tmp/phppgadmin-config.inc.php /usr/share/phppgadmin/conf/config.inc.php
 echo "Alias /phppgadmin /usr/share/phppgadmin" >> /etc/apache2/sites-enabled/000-default.conf
 systemctl restart apache2
+
+#ssh2 and ufw
+sed -i "/\#Port/a Port=2202 \nProtocol 2" /etc/ssh/sshd_config
+ufw enable
+for port in 2202 2002 2003 2004 2005 21 22 25 53 80 143 443 465 993 3306 5432 8080 8000 8081
+do
+ufw allow $port
+done
+
 echo "Done" > /root/README.md
 reboot
