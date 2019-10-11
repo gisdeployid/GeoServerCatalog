@@ -109,10 +109,12 @@ systemctl restart postgresql
 
 cd /tmp;wget https://github.com/phppgadmin/phppgadmin/archive/REL_5-6-0.zip;
 wget https://gist.githubusercontent.com/ajikamaludin/2d1ae989402decad064f4d7d7ce424be/raw/60277bb5064b12e6c42993c4ecf08fd22ff5f969/phppgadmin-config.inc.php;
-unzip REL_5-6-0.zip -d /usr/share
-mv /usr/share/phppgadmin-REL_5-6-0 /usr/share/phppgadmin
-cp /tmp/phppgadmin-config.inc.php /usr/share/phppgadmin/conf/config.inc.php
-echo "Alias /phppgadmin /usr/share/phppgadmin" >> /etc/apache2/sites-enabled/000-default.conf
+unzip REL_5-6-0.zip -d /home/$uname
+mv /home/$uname/phppgadmin-REL_5-6-0 /home/$uname/phppgadmin
+cp /tmp/phppgadmin-config.inc.php /home/$uname/phppgadmin/conf/config.inc.php
+echo "Alias /phppgadmin /home/$uname/phppgadmin" >> /etc/apache2/sites-enabled/000-default.conf
+sed -i '$i <Directory /home/'$uname'/phppgadmin> \nOrder allow,deny \nAllow from all \nRequire all granted \n</Directory>\n' /etc/apache2/sites-enabled/000-default.conf
+
 systemctl restart apache2
 
 #ssh2 and ufw
