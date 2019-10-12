@@ -89,7 +89,7 @@ unzip workshop-5.4.zip -d /home/$uname/public_html
 mv /home/$uname/public_html/workshop-5.4 /home/$uname/public_html/demo
 chown -R $uname:$uname /home/$uname/public_html/demo
 cd /home/$uname/public_html/demo;rm index.html;
-wget https://gist.githubusercontent.com/ajikamaludin/8e9d801f91073a9a2f7fcffaec0dbcec/raw/7ca6f9a9d46a35443ddbf89c99a8c73d1b503dc5/index.php
+wget https://gist.githubusercontent.com/gisdeployid/06ae2f7b2ed7f95f35439587f90bf5f4/raw/e034a87ad40ca05078a2b3f1e1135694409a5633/index.php
 
 #install postgresql, postgis, phppgadmin
 echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list
@@ -106,7 +106,7 @@ sed -i '$i \host all all 0.0.0.0/0 md5 \n' /etc/postgresql/11/main/pg_hba.conf
 systemctl restart postgresql
 
 cd /tmp;wget https://github.com/phppgadmin/phppgadmin/archive/REL_5-6-0.zip;
-wget https://gist.githubusercontent.com/ajikamaludin/2d1ae989402decad064f4d7d7ce424be/raw/60277bb5064b12e6c42993c4ecf08fd22ff5f969/phppgadmin-config.inc.php;
+wget https://gist.githubusercontent.com/gisdeployid/c8f5b99d6b91ee3603b9552b8b105a4e/raw/33fec2c86be05cdf337a5c6e149d71f99fccf1a8/phppgadmin-config.inc.php;
 unzip REL_5-6-0.zip -d /home/$uname
 mv /home/$uname/phppgadmin-REL_5-6-0 /home/$uname/phppgadmin
 cp /tmp/phppgadmin-config.inc.php /home/$uname/phppgadmin/conf/config.inc.php

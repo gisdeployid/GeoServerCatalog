@@ -42,7 +42,7 @@ docker exec opengeo-gdp service tomcat7 start
 #make it automation in reboot : exit rc.local
 printf '%s\n' '#!/bin/bash' 'exit 0' | sudo tee -a /etc/rc.local
 cd /etc/systemd/system/
-wget https://gist.githubusercontent.com/ajikamaludin/c8bb742cb60c7bfe8cc2a318be2fbe70/raw/32df77b43c5acf2dd5aae4f904d8ce5c0697c770/rc-local.service
+wget https://gist.githubusercontent.com/gisdeployid/6018e7c83f2d435544c0b14105e10c3a/raw/f7f0566dc2b81ced2dfcacf82357d1ed78e992f5/rc-local.service
 systemctl enable rc-local
 chmod +x /etc/rc.local
 sed -i -e '$i \docker container start opengeo-gdp &\n' /etc/rc.local
@@ -108,7 +108,7 @@ sed -i '$i \host all all 0.0.0.0/0 md5 \n' /etc/postgresql/11/main/pg_hba.conf
 systemctl restart postgresql
 
 cd /tmp;wget https://github.com/phppgadmin/phppgadmin/archive/REL_5-6-0.zip;
-wget https://gist.githubusercontent.com/ajikamaludin/2d1ae989402decad064f4d7d7ce424be/raw/60277bb5064b12e6c42993c4ecf08fd22ff5f969/phppgadmin-config.inc.php;
+wget https://gist.githubusercontent.com/gisdeployid/c8f5b99d6b91ee3603b9552b8b105a4e/raw/33fec2c86be05cdf337a5c6e149d71f99fccf1a8/phppgadmin-config.inc.php;
 unzip REL_5-6-0.zip -d /home/$uname
 mv /home/$uname/phppgadmin-REL_5-6-0 /home/$uname/phppgadmin
 cp /tmp/phppgadmin-config.inc.php /home/$uname/phppgadmin/conf/config.inc.php
