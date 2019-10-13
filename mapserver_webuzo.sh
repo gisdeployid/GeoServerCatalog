@@ -1,5 +1,5 @@
 #!/bin/bash
-#script for ubuntu 16.04
+#script for ubuntu 18.04
 #maintance by aji19kamaludin@gmail.com
 #mapserver
 
@@ -15,8 +15,8 @@
 #varible
 uname=admin
 password='!Q@W#E$R'
-email='user@example.com'
-domain='example.com'
+email='admin@webgis.my.id'
+domain='webgis.my.id'
 
 #update system
 export DEBIAN_FRONTEND=noninteractive

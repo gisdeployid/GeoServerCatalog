@@ -15,8 +15,8 @@
 #varible
 uname=admin
 password='!Q@W#E$R'
-email='user@example.com'
-domain='example.com'
+email='admin@webgis.my.id'
+domain='webgis.my.id'
 
 #update system
 export DEBIAN_FRONTEND=noninteractive
