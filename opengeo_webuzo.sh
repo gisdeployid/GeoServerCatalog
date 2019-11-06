@@ -69,10 +69,10 @@ apt install postgresql-11 postgresql-11-postgis-2.5  postgresql-11-postgis-2.5-s
 su -c "psql -c 'CREATE EXTENSION adminpack;'" postgres
 su -c "psql -c 'CREATE EXTENSION postgis;'" postgres
 su -c "psql -c \"CREATE USER gisadmin SUPERUSER PASSWORD 'gisadmin';\"" postgres
-su -c "psql -c 'ALTER USER gisadmin CREATEDB;'" postgres
+su -c "psql -c 'ALTER USER gisadmin CREATEDB CREATEROLE;'" postgres
 
-sed -i "/\#listen/a listen_addresses='*'" /etc/postgresql/11/main/postgresql.conf
-sed -i '$i \host all all 0.0.0.0/0 md5 \n' /etc/postgresql/11/main/pg_hba.conf
+sed -i "/\#listen/a listen_addresses='*'" /etc/postgresql/12/main/postgresql.conf
+sed -i '$i \host all all 0.0.0.0/0 md5 \n' /etc/postgresql/12/main/pg_hba.conf
 systemctl restart postgresql
 
 #ssh2 and ufw
